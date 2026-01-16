@@ -4,8 +4,8 @@ import { DailyEntry, User, Mood } from '../types';
 
 const moodToLabel = (mood: Mood) => {
   switch (mood) {
-    case Mood.VERY_BAD: return 'Muito Triste';
-    case Mood.BAD: return 'Triste';
+    case Mood.VERY_BAD: return 'Muito Mal';
+    case Mood.BAD: return 'Mal';
     case Mood.NEUTRAL: return 'Neutro';
     case Mood.GOOD: return 'Bem';
     case Mood.EXCELLENT: return 'Muito Bem';
@@ -13,9 +13,15 @@ const moodToLabel = (mood: Mood) => {
   }
 };
 
+// Função auxiliar para converter string YYYY-MM-DD em objeto Date local sem erros de fuso
+const parseDateLocal = (dateStr: string) => {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day, 12, 0, 0);
+};
+
 export const generateReportPDF = (user: User, entries: DailyEntry[]) => {
   const doc = new jsPDF();
-  const sortedEntries = [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const sortedEntries = [...entries].sort((a, b) => b.timestamp - a.timestamp);
 
   // Header
   doc.setFontSize(22);
@@ -26,7 +32,7 @@ export const generateReportPDF = (user: User, entries: DailyEntry[]) => {
   doc.setFontSize(12);
   doc.setTextColor(0, 0, 0);
   doc.text(`Paciente: ${user.fullName}`, 20, 35);
-  doc.text(`Data de Nascimento: ${new Date(user.birthDate).toLocaleDateString('pt-BR')}`, 20, 42);
+  doc.text(`Data de Nascimento: ${parseDateLocal(user.birthDate).toLocaleDateString('pt-BR')}`, 20, 42);
   doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, 49);
 
   doc.setLineWidth(0.5);
@@ -42,7 +48,7 @@ export const generateReportPDF = (user: User, entries: DailyEntry[]) => {
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text(`Data: ${new Date(entry.date).toLocaleDateString('pt-BR')}`, 20, y);
+    doc.text(`Data: ${parseDateLocal(entry.date).toLocaleDateString('pt-BR')}`, 20, y);
     doc.setFont('helvetica', 'normal');
     doc.text(`Humor: ${moodToLabel(entry.mood)}`, 140, y);
 

@@ -29,6 +29,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     }
   };
 
+  const formatLocalDate = (dateStr: string) => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const d = new Date(year, month - 1, day);
+    return d.toLocaleDateString('pt-BR');
+  };
+
   return (
     <Layout 
       title="Minha Jornada" 
@@ -92,7 +98,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 <div key={entry.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded">
-                      {new Date(entry.date).toLocaleDateString('pt-BR')}
+                      {formatLocalDate(entry.date)}
                     </span>
                     <span className="text-2xl">{getMoodEmoji(entry.mood)}</span>
                   </div>

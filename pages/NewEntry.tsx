@@ -8,7 +8,16 @@ interface NewEntryProps {
 }
 
 const NewEntry: React.FC<NewEntryProps> = ({ user }) => {
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  // Função para pegar a data local no formato YYYY-MM-DD com precisão
+  const getTodayLocal = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const [date, setDate] = useState(getTodayLocal());
   const [notes, setNotes] = useState('');
   const [mood, setMood] = useState<Mood | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,13 +39,19 @@ const NewEntry: React.FC<NewEntryProps> = ({ user }) => {
 
     setIsSubmitting(true);
 
+    // Criar um timestamp baseado na data escolhida pelo usuário para manter a ordenação correta
+    // Adicionamos a hora atual para manter a ordem caso haja múltiplos registros no mesmo dia
+    const now = new Date();
+    const [year, month, day] = date.split('-').map(Number);
+    const entryDate = new Date(year, month - 1, day, now.getHours(), now.getMinutes(), now.getSeconds());
+
     const newEntry: DailyEntry = {
       id: crypto.randomUUID(),
       userId: user.id,
       date,
       notes,
       mood,
-      timestamp: Date.now()
+      timestamp: entryDate.getTime()
     };
 
     const allEntries: DailyEntry[] = JSON.parse(localStorage.getItem('psicolog_entries') || '[]');
